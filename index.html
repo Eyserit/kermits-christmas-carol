@@ -364,28 +364,6 @@
   .knob.big { width: 52px; height: 52px; font-size: 18px; }
   .knob:active { transform: translateY(2px); box-shadow: 0 1px 0 #4a3210; }
 
-  /* On-screen arrow pad, shown only on touch screens */
-  .dpad {
-    display: none;
-    grid-template-columns: repeat(3, 58px);
-    grid-template-areas: ". up ." "left mid right" ". down .";
-    gap: 6px;
-    justify-content: center;
-    margin-top: 14px;
-    user-select: none; -webkit-user-select: none;
-  }
-  @media (pointer: coarse) { .dpad { display: grid; } }
-  .dpad .knob { width: 58px; height: 58px; font-size: 22px; touch-action: none; -webkit-tap-highlight-color: transparent; }
-  .dpad .pad-up { grid-area: up; }
-  .dpad .pad-left { grid-area: left; }
-  .dpad .pad-right { grid-area: right; }
-  .dpad .pad-down { grid-area: down; }
-  .dpad .pad-mid {
-    grid-area: mid; font-size: 18px; color: var(--parchment);
-    background: radial-gradient(circle at 35% 30%, #e85a66, #b3202c 50%, #6e0f17 100%);
-    box-shadow: 0 3px 0 #4a0a10, 0 5px 10px rgba(0, 0, 0, 0.5);
-  }
-  .dpad .knob.pressed { transform: translateY(2px); box-shadow: 0 1px 0 #4a3210; filter: brightness(1.15); }
   .vol { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--parchment-2); font: 13px var(--fell-sc); letter-spacing: 1px; }
   .vol input { flex: 1; accent-color: var(--gold); }
   .now { font-size: 14px; font-style: italic; color: var(--parchment-2); margin-top: 8px; min-height: 1.4em; text-align: center; }
@@ -407,13 +385,8 @@
   @media (max-width: 760px) {
     .app { grid-template-columns: 1fr; }
     .stage { max-width: 460px; width: 100%; margin: 0 auto; }
-    body { padding-top: 12px; }
-    h1 { font-size: 30px; }
-    .presents, .tagline { display: none; }
-    header { padding-bottom: 8px; gap: 10px; }
-    .plaque { min-width: 90px; padding: 4px 12px 5px; }
-    .plaque b { font-size: 22px; }
-    .sign { font-size: 18px; letter-spacing: 2px; margin: 12px 0 12px; }
+    h1 { font-size: 36px; }
+    .sign { font-size: 18px; letter-spacing: 2px; }
     body { background: radial-gradient(ellipse at 50% 0%, var(--night-2) 0%, transparent 70%), var(--night); }
     .frame { padding: 10px; }
     .holly.tl { left: -8px; }
@@ -491,13 +464,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="dpad" id="dpad" aria-label="Touch controls">
-      <button class="knob pad-up" type="button" data-dir="up" aria-label="Up">▲</button>
-      <button class="knob pad-left" type="button" data-dir="left" aria-label="Left">◀</button>
-      <button class="knob pad-mid" type="button" id="padPause" aria-label="Pause or resume">⏸</button>
-      <button class="knob pad-right" type="button" data-dir="right" aria-label="Right">▶</button>
-      <button class="knob pad-down" type="button" data-dir="down" aria-label="Down">▼</button>
     </div>
   </div>
 
@@ -1022,21 +988,6 @@
   boardEl.addEventListener('pointerup', endSwipe);
   boardEl.addEventListener('pointercancel', endSwipe);
 
-  // On-screen arrow pad (touch screens only); reacts on press, not release, for snappier turns
-  document.querySelectorAll('#dpad .knob').forEach(btn => {
-    btn.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      audio.unlock();
-      btn.classList.add('pressed');
-      if (btn.dataset.dir) steer(btn.dataset.dir);
-      else pauseOrStart();
-    });
-    const release = () => btn.classList.remove('pressed');
-    btn.addEventListener('pointerup', release);
-    btn.addEventListener('pointercancel', release);
-    btn.addEventListener('pointerleave', release);
-  });
-
   // Pause automatically when the tab is hidden
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && state === 'playing') togglePause();
@@ -1374,7 +1325,7 @@
   showOverlay("Kermit's Christmas Carol",
     'Guide Kermit through snowy London collecting Christmas cheer. ' +
       (matchMedia('(pointer: coarse)').matches
-        ? 'Swipe on the board or use the arrow pad to move.'
+        ? 'Swipe on the board to move.'
         : 'Arrow keys or WASD to move, Space to pause.'),
     { hint: 'or press Enter to begin the tale' });
 
