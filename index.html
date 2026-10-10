@@ -879,6 +879,9 @@
     }
   }
 
+  // Music starts with the first game, unless the player has already paused it themselves
+  let musicAutoStarted = false;
+
   function start() {
     reset();
     acc = 0;
@@ -886,6 +889,10 @@
     overlay.hidden = true;
     lastNewEntry = null;
     renderLeaderboard();
+    if (!musicAutoStarted) {
+      musicAutoStarted = true;
+      if (!audio.playing && !audio.userPaused) audio.play();
+    }
   }
 
   function togglePause() {
@@ -984,7 +991,11 @@
     swipe.x = e.clientX;
     swipe.y = e.clientY;
   });
-  const endSwipe = e => { if (swipe && e.pointerId === swipe.id) swipe = null; };
+  const endSwipe = e => {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    swipe = null;
+    audio.unlock(); // some phones only allow audio to start when the finger lifts
+  };
   boardEl.addEventListener('pointerup', endSwipe);
   boardEl.addEventListener('pointercancel', endSwipe);
 
@@ -1101,7 +1112,7 @@
 
   const audio = {
     ctx: null, master: null, musicBus: null, noise: null,
-    playing: false, songIdx: savedSongIdx(),
+    playing: false, userPaused: false, songIdx: savedSongIdx(),
     volume: store.get('snake.volume', 50),
     step: 0, nextTime: 0, timer: null,
 
@@ -1309,7 +1320,9 @@
     },
   };
 
-  playBtn.addEventListener('click', () => (audio.playing ? audio.pause() : audio.play()));
+  playBtn.addEventListener('click', () => {
+    if (audio.playing) { audio.pause(); audio.userPaused = true; } else audio.play();
+  });
   $('prevBtn').addEventListener('click', () => { audio.unlock(); audio.skip(-1); });
   $('nextBtn').addEventListener('click', () => { audio.unlock(); audio.skip(1); });
   volEl.value = audio.volume;
